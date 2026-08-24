@@ -17,3 +17,6 @@ Thumbs.db
 .postman
 Hands on tasks Phase1.md
 Project Description.md
+
+*.log
+app.log

@@ -1,12 +1,14 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
-from . import tickets, users
+from . import auth_routes, tickets, users
+import app.models
 from contextlib import asynccontextmanager
 from .database import Base, engine
 import json
 import logging
-
+# study sso and cognito
 logging.basicConfig(filename="app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 
 
 @asynccontextmanager
@@ -24,9 +26,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+app.include_router(auth_routes.router)
 app.include_router(users.router)
 app.include_router(tickets.router)
-
 
 @app.get("/")
 async def Welcome_page():
@@ -42,6 +45,8 @@ async def health_check():
 async def hide_user_pass(request: Request, call_next):
     response = await call_next(request)
     logging.info("Entered middleware")
+    if request.url.path.startswith("/tickets"):
+        return response
     # Only process JSON responses
     if request.method == "GET" and "application/json" in response.headers.get("content-type", ""):
         body = b""

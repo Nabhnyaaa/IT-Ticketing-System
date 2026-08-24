@@ -54,6 +54,14 @@ async def get_tickets(
     return result.scalars().all()
 
 
+@router.get("/assigned/", response_model=list[TicketResponse])
+async def get_assigned_tickets(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    result = await db.execute(
+        select(Ticket).where(Ticket.assigned_id == current_user.id)
+    )
+    return result.scalars().all()
+
+
 @router.get("/{ticket_id}", response_model=TicketResponse)
 async def get_ticket(ticket_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(

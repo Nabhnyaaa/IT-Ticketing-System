@@ -6,26 +6,38 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from .database import get_db
 from .models import User
+import bcrypt
+from app.auth import get_current_user, require_role
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
 # will later show the users in the frontend as a table
 @router.get("/")
-async def read_users(db: AsyncSession = Depends(get_db)):
+async def read_users(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["HELPDESK MANAGER", "ADMIN"])),
+):
     result = await db.execute(select(User))
     users = result.scalars().all()
     return users
 
 
 
+
 # will later alow creation of users
 @router.post("/create-user/")
-async def create_user(user: User_create, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)):
+async def create_user(
+    user: User_create,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["ADMIN"])),
+):
     new_user = User(
         name=user.name,
         email=user.email,
-        password=user.password
+        password=bcrypt.hashpw((user.password).encode("utf-8"),bcrypt.gensalt()).decode('utf-8'),
+        role=user.role,
     )
     db.add(new_user)
     await db.commit()
@@ -39,7 +51,9 @@ async def create_user(user: User_create, background_tasks: BackgroundTasks, db: 
 
 # will later show the user in the frontend as a table
 @router.get("/{user_id}")
-async def read_user(user_id: int, db: AsyncSession = Depends(get_db)):
+async def read_user(user_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role.upper() == "USER" and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="You can only view your own user profile")
     result = await db.execute(
         select(User).where(User.id == user_id)
     )
@@ -52,10 +66,11 @@ async def read_user(user_id: int, db: AsyncSession = Depends(get_db)):
     return user
 
 
-
 # Updating existing user details
 @router.put("/{user_id}")
-async def update_user(user_id: int, user_data: UserUpdate, db: AsyncSession = Depends(get_db)):
+async def update_user(user_id: int, user_data: UserUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if current_user.role.upper() == "USER" and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="You can only update your own user profile")
     result = await db.execute(
         select(User).where(User.id == user_id)
     )
@@ -66,20 +81,23 @@ async def update_user(user_id: int, user_data: UserUpdate, db: AsyncSession = De
         user.name = user_data.name
     if user_data.email is not None:
         user.email = user_data.email
+    if user_data.role is not None:
+        if current_user.role.upper() != "ADMIN":
+            raise HTTPException(status_code=403, detail="Only admins can change roles")
+        user.role = user_data.role
     if user_data.password is not None:
-        user.password = user_data.password
+        user.password = bcrypt.hashpw((user_data.password).encode("utf-8"),bcrypt.gensalt()).decode('utf-8')
     await db.commit()
     await db.refresh(user)
     return user
 
 #delete endpoint used to delete a user from the database
 @router.delete("/{user_id}")
-async def delete_user(user_id: int, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)):
+async def delete_user(user_id: int, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db),admin_user: User = Depends(require_role(["ADMIN"]))):
     result = await db.execute(
         select(User).where(User.id == user_id)
     )
     user = result.scalar_one_or_none()
-
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     background_tasks.add_task(

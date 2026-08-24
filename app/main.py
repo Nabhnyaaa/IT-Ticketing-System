@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
 from . import auth_routes, tickets, users
 import app.models
 from contextlib import asynccontextmanager
@@ -30,6 +31,7 @@ app = FastAPI(
 app.include_router(auth_routes.router)
 app.include_router(users.router)
 app.include_router(tickets.router)
+app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
 @app.get("/")
 async def Welcome_page():

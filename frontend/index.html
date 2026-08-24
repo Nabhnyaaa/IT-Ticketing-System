@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deskline | IT Ticketing</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+    :root { --ink:#17202a; --muted:#68737d; --paper:#f4f6f4; --panel:#fff; --line:#dce3df; --teal:#087f75; --teal-dark:#075d58; --coral:#e56c4d; --gold:#e4a83d; --danger:#c94c51; --shadow:0 18px 50px rgba(35,55,48,.08); }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:'DM Sans',sans-serif; }
+    button, input, select, textarea { font:inherit; }
+    button { cursor:pointer; border:0; }
+    .shell { min-height:100vh; display:grid; grid-template-columns:250px 1fr; }
+    .sidebar { padding:28px 20px; background:#143f3a; color:#edf6f0; display:flex; flex-direction:column; }
+    .brand { display:flex; align-items:center; gap:11px; padding:0 10px 38px; }
+    .mark { width:35px; height:35px; border-radius:10px; display:grid; place-items:center; background:var(--coral); color:white; font-family:'Space Grotesk'; font-weight:700; }
+    .brand strong { font:600 21px 'Space Grotesk'; letter-spacing:-.5px; }
+    .eyebrow { margin:0 0 8px; color:#93c7bd; text-transform:uppercase; letter-spacing:1.8px; font-size:10px; font-weight:700; }
+    .nav { display:grid; gap:7px; }
+    .nav button { padding:12px 13px; border-radius:9px; text-align:left; color:#b8d4cd; background:transparent; font-weight:600; }
+    .nav button:hover, .nav button.active { color:#fff; background:#21564f; }
+    .sidebar-footer { margin-top:auto; border-top:1px solid rgba(255,255,255,.12); padding:18px 10px 0; }
+    .user-chip { display:flex; align-items:center; gap:10px; }
+    .avatar { width:34px; height:34px; display:grid; place-items:center; border-radius:50%; background:#f1c46c; color:#614a20; font-weight:700; }
+    .user-chip small { display:block; color:#9fc4bc; margin-top:2px; }
+    .logout { margin-top:16px; width:100%; padding:10px; background:transparent; color:#f0b6a3; text-align:left; }
+    main { min-width:0; }
+    .topbar { height:84px; padding:0 42px; background:var(--panel); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
+    .topbar h1 { margin:0; font:600 24px 'Space Grotesk'; letter-spacing:-.7px; }
+    .topbar p { margin:5px 0 0; color:var(--muted); font-size:13px; }
+    .content { padding:34px 42px 56px; max-width:1400px; }
+    .view { display:none; animation:rise .35s ease both; }
+    .view.active { display:block; }
+    @keyframes rise { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:none; } }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; margin-bottom:28px; }
+    .stat, .panel { background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); }
+    .stat { padding:20px; position:relative; overflow:hidden; }
+    .stat:after { content:''; position:absolute; right:-15px; bottom:-26px; width:82px; height:82px; border-radius:50%; background:#e1f0ea; }
+    .stat:nth-child(2):after { background:#fff1cf; }.stat:nth-child(3):after { background:#fde1d8; }.stat:nth-child(4):after { background:#dfe8f3; }
+    .stat span { color:var(--muted); font-size:12px; font-weight:600; }.stat strong { display:block; margin-top:8px; font:700 31px 'Space Grotesk'; }
+    .section-head { display:flex; align-items:end; justify-content:space-between; gap:16px; margin:10px 0 15px; }.section-head h2 { margin:0; font:600 20px 'Space Grotesk'; }.section-head p { margin:5px 0 0; color:var(--muted); font-size:13px; }
+    .panel { padding:22px; }.toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:17px; }
+    input, select, textarea { width:100%; border:1px solid var(--line); background:#fbfcfb; color:var(--ink); border-radius:8px; padding:11px 12px; outline:none; }.toolbar input { max-width:290px; }.toolbar select { width:auto; min-width:145px; }
+    input:focus, select:focus, textarea:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(8,127,117,.12); }
+    .btn { border-radius:8px; padding:10px 14px; font-weight:700; }.btn-primary { color:white; background:var(--teal); }.btn-primary:hover { background:var(--teal-dark); }.btn-ghost { color:var(--teal-dark); background:#e3f0ec; }.btn-danger { color:#fff; background:var(--danger); }.btn-small { padding:7px 10px; font-size:12px; }
+    .table-wrap { overflow:auto; }.table { width:100%; border-collapse:collapse; min-width:720px; }.table th { text-align:left; padding:11px 12px; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--line); }.table td { padding:15px 12px; border-bottom:1px solid #edf0ee; font-size:13px; vertical-align:middle; }.table tr:last-child td { border-bottom:0; }.table tbody tr:hover { background:#fafcfb; }
+    .ticket-title { font-weight:700; }.subtle { color:var(--muted); font-size:12px; margin-top:4px; }.badge { display:inline-flex; padding:5px 8px; border-radius:20px; font-size:11px; font-weight:700; }.open { color:#966d12; background:#fff3d2; }.closed { color:#087065; background:#dff1eb; }.assigned { color:#405b8a; background:#e5edfb; }.unassigned { color:#77817d; background:#edf0ee; }
+    .empty { padding:42px 15px; text-align:center; color:var(--muted); }.empty strong { display:block; color:var(--ink); margin-bottom:5px; }
+    .modal-backdrop { position:fixed; inset:0; padding:25px; display:none; place-items:center; background:rgba(13,34,31,.55); z-index:4; }.modal-backdrop.show { display:grid; }.modal { width:min(620px,100%); max-height:90vh; overflow:auto; background:white; border-radius:14px; padding:25px; box-shadow:0 25px 80px rgba(0,0,0,.2); }.modal h2 { margin:0 0 5px; font:600 21px 'Space Grotesk'; }.modal > p { margin:0 0 20px; color:var(--muted); font-size:13px; }.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }.field { display:grid; gap:6px; }.field.full { grid-column:1/-1; }.field label { color:var(--muted); font-size:12px; font-weight:700; }.modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:21px; }
+    .toast { position:fixed; right:22px; bottom:22px; padding:13px 16px; color:#fff; background:#183e39; border-radius:8px; box-shadow:var(--shadow); transform:translateY(18px); opacity:0; pointer-events:none; transition:.25s; z-index:8; }.toast.show { opacity:1; transform:none; }.toast.error { background:var(--danger); }
+    .auth { min-height:100vh; display:grid; place-items:center; padding:25px; background:#143f3a; }.auth-card { width:min(430px,100%); padding:36px; border-radius:15px; background:#fff; box-shadow:0 25px 80px rgba(0,0,0,.2); }.auth-brand { margin-bottom:26px; }.auth-card h1 { margin:0; font:600 28px 'Space Grotesk'; }.auth-card p { color:var(--muted); font-size:13px; line-height:1.55; }.auth-card form { display:grid; gap:13px; margin-top:22px; }.auth-card .btn { width:100%; margin-top:5px; }.auth-switch { margin:22px 0 0; text-align:center; }.link { color:var(--teal); font-weight:700; background:none; padding:0; }
+    @media (max-width:900px) { .shell { grid-template-columns:1fr; }.sidebar { padding:15px 18px; }.brand { padding:0 0 15px; }.nav { grid-template-columns:repeat(4,1fr); }.nav button { text-align:center; padding:9px 5px; font-size:12px; }.sidebar-footer { display:none; }.topbar { padding:0 22px; height:75px; }.content { padding:24px 22px; }.stats { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:560px) { .nav { grid-template-columns:repeat(2,1fr); }.stats { gap:9px; }.stat { padding:15px; }.stat strong { font-size:25px; }.form-grid { grid-template-columns:1fr; }.field.full { grid-column:auto; }.toolbar input, .toolbar select { max-width:none; width:100%; }.topbar h1 { font-size:20px; } }
+  </style>
+</head>
+<body>
+  <div id="auth-screen" class="auth">
+    <section class="auth-card">
+      <div class="brand auth-brand"><span class="mark">D</span><strong>deskline</strong></div>
+      <p class="eyebrow">IT service desk</p>
+      <h1 id="auth-title">Welcome back</h1>
+      <p id="auth-copy">Sign in to see your support queue and keep work moving.</p>
+      <form id="login-form">
+        <div class="field"><label>Email</label><input id="login-email" type="email" required></div>
+        <div class="field"><label>Password</label><input id="login-password" type="password" required></div>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+      </form>
+      <form id="register-form" hidden>
+        <div class="field"><label>Name</label><input id="register-name" required></div>
+        <div class="field"><label>Email</label><input id="register-email" type="email" required></div>
+        <div class="field"><label>Password</label><input id="register-password" type="password" minlength="8" required></div>
+        <div class="field"><label>Account type</label><select id="register-role"><option value="USER">User</option><option value="HELPDESK TECHNICIAN">Helpdesk Technician</option><option value="HELPDESK MANAGER">Helpdesk Manager</option></select></div>
+        <button class="btn btn-primary" type="submit">Create account</button>
+      </form>
+      <p class="auth-switch"><span id="switch-copy">New to Deskline?</span> <button id="switch-auth" class="link" type="button">Create an account</button></p>
+    </section>
+  </div>
+
+  <div id="app-shell" class="shell" hidden>
+    <aside class="sidebar">
+      <div class="brand"><span class="mark">D</span><strong>deskline</strong></div>
+      <p class="eyebrow">Workspace</p>
+      <nav class="nav">
+        <button class="active" data-view="dashboard">Overview</button>
+        <button data-view="tickets">Tickets</button>
+        <button data-view="people" id="people-nav">People</button>
+      </nav>
+      <div class="sidebar-footer"><div class="user-chip"><span class="avatar" id="user-avatar">U</span><div><strong id="user-name">User</strong><small id="user-role">USER</small></div></div><button class="logout" id="logout">Sign out</button></div>
+    </aside>
+    <main>
+      <header class="topbar"><div><h1 id="page-title">Overview</h1><p id="page-subtitle">A clear view of today's support work.</p></div><button class="btn btn-primary" id="new-ticket">+ New ticket</button></header>
+      <div class="content">
+        <section id="dashboard-view" class="view active"><div class="stats"><div class="stat"><span>Total tickets</span><strong id="stat-total">0</strong></div><div class="stat"><span>Open queue</span><strong id="stat-open">0</strong></div><div class="stat"><span>Resolved</span><strong id="stat-closed">0</strong></div><div class="stat"><span>Assigned</span><strong id="stat-assigned">0</strong></div></div><div class="section-head"><div><h2>Latest activity</h2><p>Recent tickets across your workspace.</p></div><button class="btn btn-ghost btn-small" id="refresh-dashboard">Refresh</button></div><div class="panel"><div id="dashboard-list"></div></div></section>
+        <section id="tickets-view" class="view"><div class="section-head"><div><h2>Ticket queue</h2><p>Create, track and update support requests.</p></div><button class="btn btn-primary" id="new-ticket-2">+ New ticket</button></div><div class="panel"><div class="toolbar"><input id="ticket-search" placeholder="Search tickets..."><select id="status-filter"><option value="">All statuses</option><option value="OPEN">Open</option><option value="CLOSED">Closed</option></select><select id="priority-filter"><option value="">All priorities</option><option value="LOW">Low</option><option value="MEDIUM">Medium</option><option value="HIGH">High</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th>Ticket</th><th>Status</th><th>Priority</th><th>Assigned</th><th>Actions</th></tr></thead><tbody id="ticket-table"></tbody></table></div></div></section>
+        <section id="people-view" class="view"><div class="section-head"><div><h2>People</h2><p>Team members available for ticket assignment.</p></div></div><div class="panel"><div class="table-wrap"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>ID</th></tr></thead><tbody id="people-table"></tbody></table></div></div></section>
+      </div>
+    </main>
+  </div>
+
+  <div id="ticket-modal" class="modal-backdrop"><section class="modal"><h2 id="modal-title">Create a ticket</h2><p id="modal-copy">Tell the service desk what needs attention.</p><form id="ticket-form"><div class="form-grid"><div class="field full"><label>Title</label><input id="ticket-title" required></div><div class="field full"><label>Description</label><textarea id="ticket-description" rows="4" required></textarea></div><div class="field"><label>Category</label><input id="ticket-category" placeholder="Hardware, software..."></div><div class="field"><label>Priority</label><select id="ticket-priority"><option value="LOW">Low</option><option value="MEDIUM" selected>Medium</option><option value="HIGH">High</option></select></div><div class="field" id="assign-field"><label>Assign to user ID</label><input id="ticket-assigned" type="number" min="1"></div></div><div class="modal-actions"><button type="button" class="btn btn-ghost" id="close-modal">Cancel</button><button class="btn btn-primary" type="submit">Create ticket</button></div></form></section></div>
+  <div id="detail-modal" class="modal-backdrop"><section class="modal"><h2 id="detail-title">Ticket</h2><p id="detail-meta"></p><div id="detail-content"></div><div class="modal-actions"><button class="btn btn-ghost" id="close-detail">Close</button></div></section></div>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API = window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin;
+    const state = { token: localStorage.getItem('deskline_token'), user: JSON.parse(localStorage.getItem('deskline_user') || 'null'), tickets: [], people: [], editing: null };
+    const $ = id => document.getElementById(id);
+    const role = () => (state.user?.role || 'USER').toUpperCase();
+    const canManage = () => ['HELPDESK TECHNICIAN','HELPDESK MANAGER','ADMIN'].includes(role());
+    const isAdmin = () => role() === 'ADMIN';
+    function toast(message, error=false) { const el=$('toast'); el.textContent=message; el.className='toast show'+(error?' error':''); setTimeout(()=>el.className='toast',3000); }
+    async function api(path, options={}) { const headers={...(options.headers||{})}; if(state.token) headers.Authorization=`Bearer ${state.token}`; if(options.body && typeof options.body === 'string') headers['Content-Type']='application/json'; const res=await fetch(API+path,{...options,headers}); let body=null; try { body=await res.json(); } catch {} if(!res.ok) throw new Error(body?.detail || `Request failed (${res.status})`); return body; }
+    function showAuth(register=false) { $('auth-screen').hidden=false; $('app-shell').hidden=true; $('login-form').hidden=register; $('register-form').hidden=!register; $('auth-title').textContent=register?'Create your account':'Welcome back'; $('auth-copy').textContent=register?'Join your team workspace and start resolving issues.':'Sign in to see your support queue and keep work moving.'; $('switch-copy').textContent=register?'Already have an account?':'New to Deskline?'; $('switch-auth').textContent=register?'Sign in':'Create an account'; }
+    function showApp() { $('auth-screen').hidden=true; $('app-shell').hidden=false; $('user-name').textContent=state.user.name; $('user-role').textContent=role(); $('user-avatar').textContent=state.user.name.slice(0,1).toUpperCase(); $('people-nav').hidden=!(role()==='ADMIN'||role()==='HELPDESK MANAGER'); $('new-ticket').hidden=false; loadAll(); }
+    $('switch-auth').onclick=()=>showAuth(!$('register-form').hidden);
+    $('login-form').onsubmit=async e=>{e.preventDefault(); try { const form=new URLSearchParams({username:$('login-email').value,password:$('login-password').value}); const data=await api('/auth/login',{method:'POST',body:form,headers:{'Content-Type':'application/x-www-form-urlencoded'}}); state.token=data.access_token; const payload=JSON.parse(atob(data.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); state.user=await api(`/users/${payload.sub}`); localStorage.setItem('deskline_token',state.token); localStorage.setItem('deskline_user',JSON.stringify(state.user)); showApp(); toast('Signed in'); } catch(err){toast(err.message,true);} };
+    $('register-form').onsubmit=async e=>{e.preventDefault(); try { await api('/auth/register',{method:'POST',body:JSON.stringify({name:$('register-name').value,email:$('register-email').value,password:$('register-password').value,role:$('register-role').value})}); toast('Account created. Please sign in.'); showAuth(false); } catch(err){toast(err.message,true);} };
+    $('logout').onclick=()=>{
+      localStorage.removeItem('deskline_token');
+      localStorage.removeItem('deskline_user');
+      state.token = null;
+      state.user = null;
+      window.location.reload();
+    };
+    function switchView(view) { document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view)); document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view+'-view')); $('page-title').textContent=view==='dashboard'?'Overview':view==='tickets'?'Tickets':'People'; $('page-subtitle').textContent=view==='dashboard'?"A clear view of today's support work.":view==='tickets'?'Create, track and update support requests.':'Manage the people behind the queue.'; if(view==='people') loadPeople(); }
+    document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+    function badge(value, kind=value?.toLowerCase()) { return `<span class="badge ${kind==='closed'?'closed':kind==='open'?'open':value?'assigned':'unassigned'}">${value||'Unassigned'}</span>`; }
+    function renderStats() { $('stat-total').textContent=state.tickets.length; $('stat-open').textContent=state.tickets.filter(t=>t.status==='OPEN').length; $('stat-closed').textContent=state.tickets.filter(t=>t.status==='CLOSED').length; $('stat-assigned').textContent=state.tickets.filter(t=>t.assigned_id).length; }
+    function renderTickets() { const search=$('ticket-search').value.toLowerCase(), status=$('status-filter').value, priority=$('priority-filter').value; const list=state.tickets.filter(t=>(!search||`${t.title} ${t.description} ${t.category||''}`.toLowerCase().includes(search))&&(!status||t.status===status)&&(!priority||t.priority===priority)); $('ticket-table').innerHTML=list.length?list.map(t=>`<tr><td><div class="ticket-title">#${t.id} ${t.title}</div><div class="subtle">${t.category||'General'} · ${new Date(t.created_at).toLocaleDateString()}</div></td><td>${badge(t.status)}</td><td>${t.priority||'—'}</td><td>${badge(t.assigned_id, t.assigned_id?'assigned':'unassigned')}</td><td><button class="btn btn-ghost btn-small" onclick="openDetail(${t.id})">View</button>${canManage()?` <button class="btn btn-small" onclick="openEdit(${t.id})">Edit</button>`:''}</td></tr>`).join(''):'<tr><td colspan="5"><div class="empty"><strong>No tickets found</strong>Try adjusting your filters or create a new request.</div></td></tr>'; }
+    function renderDashboard() { const list=state.tickets.slice().sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5); $('dashboard-list').innerHTML=list.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Ticket</th><th>Status</th><th>Priority</th><th></th></tr></thead><tbody>${list.map(t=>`<tr><td><div class="ticket-title">#${t.id} ${t.title}</div><div class="subtle">${t.category||'General'}</div></td><td>${badge(t.status)}</td><td>${t.priority||'—'}</td><td><button class="btn btn-ghost btn-small" onclick="openDetail(${t.id})">Open</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty"><strong>Your queue is clear</strong>New tickets will appear here.</div>'; }
+    async function loadAll(){ try { state.tickets=await api('/tickets/'); renderStats(); renderTickets(); renderDashboard(); } catch(err){toast(err.message,true);} }
+    async function loadPeople(){ try { state.people=await api('/users/'); $('people-table').innerHTML=state.people.map(p=>`<tr><td class="ticket-title">${p.name}</td><td>${p.email}</td><td>${badge(p.role,'assigned')}</td><td>${p.id}</td></tr>`).join(''); } catch(err){toast(err.message,true);} }
+    $('ticket-search').oninput=renderTickets; $('status-filter').onchange=renderTickets; $('priority-filter').onchange=renderTickets; $('refresh-dashboard').onclick=loadAll;
+    function openModal(edit=null){ state.editing=edit; $('ticket-modal').classList.add('show'); $('modal-title').textContent=edit?'Update ticket':'Create a ticket'; $('modal-copy').textContent=edit?'Adjust status, priority or assignment.':'Tell the service desk what needs attention.'; $('ticket-form').querySelector('button[type=submit]').textContent=edit?'Save changes':'Create ticket'; $('ticket-title').value=edit?.title||''; $('ticket-description').value=edit?.description||''; $('ticket-category').value=edit?.category||''; $('ticket-priority').value=edit?.priority||'MEDIUM'; $('ticket-assigned').value=edit?.assigned_id||''; $('ticket-title').disabled=!!edit; $('ticket-description').disabled=!!edit; $('assign-field').hidden=!canManage(); }
+    function closeModal(){ $('ticket-modal').classList.remove('show'); state.editing=null; }
+    $('new-ticket').onclick=()=>openModal(); $('new-ticket-2').onclick=()=>openModal(); $('close-modal').onclick=closeModal;
+    $('ticket-form').onsubmit=async e=>{e.preventDefault(); try { if(state.editing){ const body={status:$('ticket-status-edit')?.value||state.editing.status,category:$('ticket-category').value||null,priority:$('ticket-priority').value||null,assigned_id:$('ticket-assigned').value?Number($('ticket-assigned').value):null}; await api(`/tickets/${state.editing.id}`,{method:'PUT',body:JSON.stringify(body)}); } else { await api('/tickets/create-ticket/',{method:'POST',body:JSON.stringify({title:$('ticket-title').value,description:$('ticket-description').value,category:$('ticket-category').value||null,priority:$('ticket-priority').value||null,assigned_id:$('ticket-assigned').value?Number($('ticket-assigned').value):null})}); } closeModal(); await loadAll(); toast(state.editing?'Ticket updated':'Ticket created'); } catch(err){toast(err.message,true);} };
+    window.openEdit=id=>{const t=state.tickets.find(x=>x.id===id); if(t){openModal(t); const field=document.createElement('select'); field.id='ticket-status-edit'; field.innerHTML='<option value="OPEN">Open</option><option value="CLOSED">Closed</option>'; field.value=t.status; const wrap=document.createElement('div'); wrap.className='field'; wrap.innerHTML='<label>Status</label>'; wrap.appendChild(field); document.querySelector('#ticket-form .form-grid').insertBefore(wrap,document.querySelector('#assign-field')); }};
+    window.openDetail=async id=>{const t=state.tickets.find(x=>x.id===id); if(!t)return; $('detail-title').textContent=`#${t.id} ${t.title}`; $('detail-meta').textContent=`${t.category||'General'} · ${t.priority||'No priority'} · ${t.status}`; let comments=''; try { const data=await api(`/tickets/${id}/comments`); comments=`<h3>Comments</h3>${data.map(c=>`<p class="subtle">${c.content}</p>`).join('')}`; } catch {} $('detail-content').innerHTML=`<p>${t.description}</p><p>${badge(t.status)} ${badge(t.assigned_id,t.assigned_id?'assigned':'unassigned')}</p>${comments}<form id="comment-form" class="toolbar"><input id="comment-text" placeholder="Add a comment..."><button class="btn btn-primary btn-small">Comment</button></form>`; $('detail-modal').classList.add('show'); $('comment-form').onsubmit=async e=>{e.preventDefault(); try{await api(`/tickets/${id}/comments`,{method:'POST',body:JSON.stringify({ticket_id:id,user_id:state.user.id,content:$('comment-text').value})}); toast('Comment added'); openDetail(id);}catch(err){toast(err.message,true);}}; };
+    $('close-detail').onclick=()=>$('detail-modal').classList.remove('show');
+    if(state.token&&state.user) showApp(); else showAuth(false);
+  </script>
+</body>
+</html>
